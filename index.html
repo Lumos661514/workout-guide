@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="动作手册" />
 <meta name="theme-color" content="#0f1419" />
-<meta name="description" content="按部位查看健身动作要点，离线可用" />
+<meta name="description" content="按部位查看健身动作要点和动画演示" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 <title>动作讲解手册</title>
@@ -191,6 +191,84 @@ a { color: var(--accent2); }
   color: var(--muted);
   font-size: 13px;
 }
+.thumb {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0b1016;
+  border: 1px solid var(--line);
+}
+.thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #0b1016;
+}
+.thumb.is-empty { border-style: dashed; }
+.thumb.is-empty span {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
+  text-align: center;
+  padding: 4px;
+}
+.demo {
+  margin: 0 0 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b1016;
+  border: 1px solid var(--line);
+}
+.demo img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  min-height: 160px;
+  object-fit: contain;
+  background: #0b1016;
+}
+.demo figcaption {
+  margin: 0;
+  padding: 6px 12px 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.demo.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 132px;
+  border-style: dashed;
+}
+.demo-missing {
+  color: var(--muted);
+  font-size: 13px;
+}
+.video-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+.credit {
+  margin: 4px 14px 0;
+  padding: 8px 4px 2px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: center;
+}
+.credit a { color: var(--muted); }
+@media (max-width: 360px) {
+  .thumb { width: 56px; height: 56px; }
+}
 .hidden { display: none !important; }
 </style>
 </head>
@@ -210,6 +288,7 @@ a { color: var(--accent2); }
     </div>
   </header>
   <main class="main" id="main"></main>
+  <footer class="credit">演示图来自 <a href="https://github.com/JahelCuadrado/ExerciseGymGifsDB" target="_blank" rel="noopener noreferrer">ExerciseGymGifsDB</a> / <a href="https://www.jsdelivr.com/" target="_blank" rel="noopener noreferrer">jsDelivr</a>（GIFs © respective authors）</footer>
 </div>
 
 <script>
@@ -908,6 +987,78 @@ const EXERCISES = {
   ]
 };
 
+const GIF_BASE = 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0';
+
+// English name -> muscle/slug. Absent names have no close GIF (UI shows 暂无演示图):
+// Face Pull, Hip Thrust, Clamshell, Bird Dog, Rowing Machine.
+const DEMOS = {
+  'Barbell Bench Press': 'pectorals/barbell-bench-press',
+  'Dumbbell Bench Press': 'pectorals/dumbbell-bench-press',
+  'Incline Dumbbell Press': 'pectorals/dumbbell-incline-bench-press',
+  'Dumbbell Fly': 'pectorals/dumbbell-fly',
+  'Chest Press Machine': 'pectorals/lever-chest-press',
+  'Chest Dips': 'pectorals/chest-dip',
+  'Push-up': 'pectorals/push-up',
+  'Cable Crossover': 'pectorals/cable-standing-up-straight-crossovers',
+  'Pull-up': 'lats/pull-up',
+  'Lat Pulldown': 'lats/cable-pulldown',
+  'Seated Cable Row': 'upper-back/cable-seated-row',
+  'Barbell Row': 'upper-back/barbell-bent-over-row',
+  'One-arm Dumbbell Row': 'upper-back/dumbbell-one-arm-bent-over-row',
+  'Straight-arm Pulldown': 'lats/cable-straight-arm-pulldown',
+  'Reverse Fly': 'delts/dumbbell-reverse-fly',
+  'Dumbbell Shoulder Press': 'delts/dumbbell-seated-shoulder-press',
+  'Overhead Press': 'delts/barbell-standing-wide-military-press',
+  'Lateral Raise': 'delts/dumbbell-lateral-raise',
+  'Front Raise': 'delts/dumbbell-front-raise',
+  'Bent-over Lateral Raise': 'delts/dumbbell-rear-lateral-raise',
+  'Arnold Press': 'delts/dumbbell-arnold-press',
+  'Shrug': 'traps/dumbbell-shrug',
+  'Dumbbell Curl': 'biceps/dumbbell-biceps-curl',
+  'Barbell Curl': 'biceps/barbell-curl',
+  'Hammer Curl': 'biceps/dumbbell-hammer-curl',
+  'Preacher Curl': 'biceps/barbell-preacher-curl',
+  'Concentration Curl': 'biceps/dumbbell-concentration-curl',
+  'Cable Curl': 'biceps/cable-curl',
+  'Reverse Curl': 'biceps/barbell-reverse-curl',
+  'Triceps Pushdown': 'triceps/cable-pushdown',
+  'Overhead Triceps Extension': 'triceps/cable-overhead-triceps-extension-rope-attachment',
+  'Skull Crusher': 'triceps/barbell-lying-triceps-extension-skull-crusher',
+  'Triceps Dips': 'triceps/triceps-dip',
+  'Diamond / Close-grip Push-up': 'triceps/diamond-push-up',
+  'Close-grip Bench Press': 'triceps/barbell-close-grip-bench-press',
+  'Triceps Kickback': 'triceps/dumbbell-kickback',
+  'Barbell Back Squat': 'glutes/barbell-full-squat',
+  'Front Squat': 'glutes/barbell-front-squat',
+  'Leg Press': 'glutes/sled-45-leg-press',
+  'Leg Extension': 'quads/lever-leg-extension',
+  'Lying Leg Curl': 'hamstrings/lever-lying-leg-curl',
+  'Romanian Deadlift': 'glutes/barbell-romanian-deadlift',
+  'Lunge': 'glutes/forward-lunge-male',
+  'Bulgarian Split Squat': 'quads/dumbbell-single-leg-split-squat',
+  'Calf Raise': 'calves/lever-standing-calf-raise',
+  'Glute Bridge': 'glutes/low-glute-bridge-on-floor',
+  'Cable Kickback': 'glutes/cable-standing-hip-extension',
+  'Side-lying Leg Raise': 'abductors/side-hip-abduction',
+  'Back Extension (glute focus)': 'spine/hyperextension',
+  'Sumo Deadlift': 'glutes/barbell-sumo-deadlift',
+  'Sumo Squat': 'glutes/smith-sumo-squat',
+  'Plank': 'abs/weighted-front-plank',
+  'Dead Bug': 'abs/dead-bug',
+  'Crunch': 'abs/crunch-floor',
+  'Hanging Leg Raise': 'abs/hanging-leg-raise',
+  'Russian Twist': 'abs/russian-twist',
+  'Side Plank': 'abs/bodyweight-incline-side-plank',
+  'Farmer Carry': 'quads/farmers-walk',
+  'Jumping Jack': 'cardio/jack-jump-male',
+  'High Knees': 'cardio/high-knee-against-wall',
+  'Burpee': 'cardio/burpee',
+  'Mountain Climber': 'cardio/mountain-climber',
+  'Jump Rope': 'cardio/jump-rope',
+  'Treadmill Walk/Run': 'cardio/walking-on-incline-treadmill',
+  'Kettlebell Swing': 'glutes/kettlebell-swing',
+};
+
 const state = { view: 'home', partId: null, exIndex: null, q: '' };
 
 const $main = document.getElementById('main');
@@ -921,6 +1072,59 @@ function partById(id) { return PARTS.find(p => p.id === id); }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function demoSrc(ex) {
+  const file = DEMOS[ex.en];
+  return file ? `${GIF_BASE}/${file}.gif` : '';
+}
+
+function youtubeHref(ex) {
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(`${ex.cn} ${ex.en}`.trim());
+}
+
+function demoFallback(img) {
+  const box = img.closest('.demo, .thumb');
+  if (!box || box.dataset.broken) return;
+  box.dataset.broken = '1';
+  box.classList.add('is-empty');
+  if (box.classList.contains('thumb')) {
+    box.innerHTML = '<span>暂无演示图</span>';
+    return;
+  }
+  box.innerHTML = '<span class="demo-missing">暂无演示图</span>';
+}
+
+function thumbHtml(ex) {
+  const src = demoSrc(ex);
+  if (!src) {
+    return '<span class="thumb is-empty" aria-hidden="true"><span>暂无演示图</span></span>';
+  }
+  return `<span class="thumb"><img src="${src}" alt="" loading="lazy" decoding="async" onerror="demoFallback(this)"></span>`;
+}
+
+function demoBlock(ex) {
+  const src = demoSrc(ex);
+  const link = `<a class="video-link" href="${youtubeHref(ex)}" target="_blank" rel="noopener noreferrer">相关视频</a>`;
+  if (!src) {
+    return `<div class="demo is-empty" role="img" aria-label="暂无演示图"><span class="demo-missing">暂无演示图</span></div>${link}`;
+  }
+  return `<figure class="demo">
+    <img src="${src}" alt="${escapeHtml('动画演示：' + ex.cn)}" loading="lazy" decoding="async" onerror="demoFallback(this)">
+    <figcaption>动画演示</figcaption>
+  </figure>${link}`;
+}
+
+function exerciseRow(ex, attrs, subtitle) {
+  return `<button type="button" class="ex-row" ${attrs}>
+      ${thumbHtml(ex)}
+      <div class="meta">
+        <div class="cn">${escapeHtml(ex.cn)}</div>
+        <div class="en">${subtitle}</div>
+      </div>
+      <span class="chip">${escapeHtml(ex.eq)}</span>
+      <span class="chev">›</span>
+    </button>`;
 }
 
 function renderHome() {
@@ -944,7 +1148,7 @@ function renderHome() {
   }).join('');
 
   $main.innerHTML = `<div class="grid">${cards}</div>
-    <p class="hint">提示：Safari 打开后点分享 →「添加到主屏幕」，下次像 App 一样点开。内容已内置，无网络也能看。</p>`;
+    <p class="hint">提示：Safari 打开后点分享 →「添加到主屏幕」，下次像 App 一样点开。动作要点已内置，没网也能看；演示图需要联网。</p>`;
 
   $main.querySelectorAll('[data-part]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -964,15 +1168,7 @@ function renderList() {
   $back.classList.add('show');
   $searchWrap.classList.add('hidden');
 
-  const rows = list.map((ex, i) => `
-    <button type="button" class="ex-row" data-i="${i}">
-      <div class="meta">
-        <div class="cn">${escapeHtml(ex.cn)}</div>
-        <div class="en">${escapeHtml(ex.en || '')}</div>
-      </div>
-      <span class="chip">${escapeHtml(ex.eq)}</span>
-      <span class="chev">›</span>
-    </button>`).join('');
+  const rows = list.map((ex, i) => exerciseRow(ex, `data-i="${i}"`, escapeHtml(ex.en || ''))).join('');
 
   $main.innerHTML = `<div class="list">${rows}</div>`;
   $main.querySelectorAll('[data-i]').forEach(btn => {
@@ -1000,6 +1196,7 @@ function renderDetail() {
   }).join('');
 
   $main.innerHTML = `<article class="detail">
+    ${demoBlock(ex)}
     <div class="en">${escapeHtml(ex.en || '')}</div>
     <div class="equip"><span class="chip">${escapeHtml(ex.eq)}</span></div>
     <h3>要点</h3>
@@ -1026,15 +1223,11 @@ function renderSearchResults(q) {
     return;
   }
 
-  const rows = hits.map(h => `
-    <button type="button" class="ex-row" data-part="${h.partId}" data-i="${h.i}">
-      <div class="meta">
-        <div class="cn">${escapeHtml(h.ex.cn)}</div>
-        <div class="en">${escapeHtml(h.partName)} · ${escapeHtml(h.ex.en || '')}</div>
-      </div>
-      <span class="chip">${escapeHtml(h.ex.eq)}</span>
-      <span class="chev">›</span>
-    </button>`).join('');
+  const rows = hits.map(h => exerciseRow(
+    h.ex,
+    `data-part="${h.partId}" data-i="${h.i}"`,
+    `${escapeHtml(h.partName)} · ${escapeHtml(h.ex.en || '')}`
+  )).join('');
 
   $main.innerHTML = `<div class="list">${rows}</div>`;
   $main.querySelectorAll('[data-part]').forEach(btn => {

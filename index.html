@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="动作手册" />
+<meta name="theme-color" content="#0f1419" />
+<meta name="description" content="按部位查看健身动作要点，离线可用" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<title>动作讲解手册</title>
+<style>
+:root {
+  --bg: #0f1419;
+  --bg2: #161d27;
+  --card: #1a2332;
+  --card2: #222d3f;
+  --line: #2a3548;
+  --text: #e8eef7;
+  --muted: #8b9bb4;
+  --accent: #3dd68c;
+  --accent2: #5eead4;
+  --warn: #f0b429;
+  --danger: #f07178;
+  --radius: 14px;
+  --tap: 48px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  min-height: 100%;
+}
+body { padding-bottom: calc(16px + var(--safe-bot)); }
+button, input { font: inherit; color: inherit; }
+a { color: var(--accent2); }
+
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100dvh;
+}
+
+.top {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(15,20,25,.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: calc(10px + var(--safe-top)) 14px 12px;
+}
+.top-row {
+  display: flex; align-items: center; gap: 10px;
+  min-height: var(--tap);
+}
+.back {
+  display: none;
+  align-items: center; justify-content: center;
+  width: var(--tap); height: var(--tap);
+  border: 0; border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.back.show { display: inline-flex; }
+.titles { flex: 1; min-width: 0; }
+.titles h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.titles .sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.search-wrap { margin-top: 10px; position: relative; }
+.search-wrap input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg2);
+  outline: none;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap .ico {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none; font-size: 16px;
+}
+
+.main { padding: 14px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.part-card {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+  min-height: 92px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(145deg, var(--card), var(--bg2));
+  cursor: pointer;
+  text-align: left;
+  transition: transform .12s ease, border-color .12s;
+}
+.part-card:active { transform: scale(.98); }
+.part-card .emoji { font-size: 26px; line-height: 1; margin-bottom: 8px; }
+.part-card .name { font-size: 17px; font-weight: 700; }
+.part-card .count { margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+.ex-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+}
+.ex-row:active { background: var(--card2); }
+.ex-row .meta { flex: 1; min-width: 0; }
+.ex-row .cn { font-weight: 650; font-size: 16px; }
+.ex-row .en { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #243247;
+  color: var(--accent2);
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.chev { color: var(--muted); font-size: 18px; flex-shrink: 0; }
+
+.detail {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 16px;
+}
+.detail .en { color: var(--muted); font-size: 14px; margin: 4px 0 12px; }
+.detail .equip {
+  display: inline-flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.detail h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--accent);
+  letter-spacing: .04em;
+}
+.detail ul {
+  margin: 0 0 16px;
+  padding-left: 18px;
+}
+.detail li { margin: 6px 0; color: var(--text); }
+.detail li.warn { color: #ffd58a; }
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 16px;
+}
+.hint {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg2);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <button type="button" class="back" id="backBtn" aria-label="返回">‹</button>
+      <div class="titles">
+        <h1 id="title">动作讲解手册</h1>
+        <p class="sub" id="subtitle">点部位查看动作 · 可搜索</p>
+      </div>
+    </div>
+    <div class="search-wrap" id="searchWrap">
+      <span class="ico" aria-hidden="true">⌕</span>
+      <input id="search" type="search" enterkeyhint="search" placeholder="搜索动作，如 卧推 / squat" autocomplete="off" />
+    </div>
+  </header>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+const PARTS = [
+  { id: 'chest', name: '胸', emoji: '💪', color: '#3dd68c' },
+  { id: 'back', name: '背', emoji: '🪽', color: '#5eead4' },
+  { id: 'shoulder', name: '肩', emoji: '🏋️', color: '#7dd3fc' },
+  { id: 'biceps', name: '二头', emoji: '✊', color: '#c4b5fd' },
+  { id: 'triceps', name: '三头', emoji: '🤚', color: '#f9a8d4' },
+  { id: 'legs', name: '腿', emoji: '🦵', color: '#fbbf24' },
+  { id: 'glutes', name: '臀', emoji: '🍑', color: '#fb7185' },
+  { id: 'core', name: '核心', emoji: '🧱', color: '#a3e635' },
+  { id: 'cardio', name: '有氧/全身', emoji: '🔥', color: '#fb923c' },
+];
+
+const EXERCISES = {
+  chest: [
+    {
+      cn: '杠铃平板卧推', en: 'Barbell Bench Press', eq: '杠铃',
+      cues: [
+        '仰卧，双眼大致在杠铃正下方，双脚踩实地面',
+        '握距略宽于肩，肩胛骨后收下沉贴紧凳面',
+        '下放至胸中下部，前臂垂直于地面',
+        '推起时想着“把身体推离杠铃”，肘不要过度外翻',
+        '常见错误：屁股翘起、杠铃砸胸、手腕过度后折'
+      ]
+    },
+    {
+      cn: '哑铃平板卧推', en: 'Dumbbell Bench Press', eq: '哑铃',
+      cues: [
+        '哑铃举至肩上方，掌心朝前或微内旋',
+        '下放至上臂与地面接近平行，胸肌有拉伸感',
+        '推起在顶点不要大力对撞哑铃',
+        '可加大活动范围，对胸肌刺激更均匀',
+        '常见错误：下放过深导致肩前侧疼痛'
+      ]
+    },
+    {
+      cn: '上斜哑铃卧推', en: 'Incline Dumbbell Press', eq: '哑铃',
+      cues: [
+        '凳面倾斜约 30°–45°（太陡会变成肩主导）',
+        '下放轨迹略朝锁骨方向',
+        '推起保持肩胛稳定，不要耸肩',
+        '强调上胸，重量可比平板略轻',
+        '常见错误：凳面角度过大、借力甩哑铃'
+      ]
+    },
+    {
+      cn: '哑铃飞鸟', en: 'Dumbbell Fly', eq: '哑铃',
+      cues: [
+        '肘微屈固定角度，像“环抱大树”',
+        '下放至胸有拉伸即可，不要过度开肩',
+        '发力靠胸肌夹起，不是用手把哑铃甩上来',
+        '重量宜轻，感受为主',
+        '常见错误：肘角度忽大忽小、用得太重'
+      ]
+    },
+    {
+      cn: '器械推胸', en: 'Chest Press Machine', eq: '器械',
+      cues: [
+        '座椅高度调到把手约在胸中部',
+        '肩胛贴靠背，推起时呼气',
+        '末端不要完全锁死肘关节',
+        '适合新手找发力、力竭组',
+        '常见错误：座椅过高变成推肩'
+      ]
+    },
+    {
+      cn: '双杠臂屈伸（偏胸）', en: 'Chest Dips', eq: '自重/双杠',
+      cues: [
+        '身体略前倾，肘向外展开一些',
+        '下放至上臂接近平行或稍低',
+        '推起感受胸肌夹紧，肩不要过度前伸',
+        '力量不足可用弹力带辅助',
+        '常见错误：完全直立做（更偏三头）、下放过深伤肩'
+      ]
+    },
+    {
+      cn: '俯卧撑', en: 'Push-up', eq: '自重',
+      cues: [
+        '手掌约肩宽，身体成一条直线',
+        '核心收紧，屁股不要塌或撅',
+        '胸口接近地面再推起',
+        '膝盖着地或手抬高可降低难度',
+        '常见错误：塌腰、只动脖子埋头'
+      ]
+    },
+    {
+      cn: '绳索夹胸', en: 'Cable Crossover', eq: '绳索',
+      cues: [
+        '双脚前后站稳，微含胸启动',
+        '肘微屈，把手在身前交汇或接近',
+        '顶点稍停顿挤胸，再控制还原',
+        '高位偏下胸，中位偏中缝',
+        '常见错误：借腰冲、肘伸太直'
+      ]
+    }
+  ],
+  back: [
+    {
+      cn: '引体向上', en: 'Pull-up', eq: '自重',
+      cues: [
+        '正手略宽于肩，肩沉下去再拉',
+        '想着肘往髋的方向拉，胸口靠近杠',
+        '顶端下巴过杠，下放至手臂接近伸直',
+        '做不了完整可用弹力带或离心下放',
+        '常见错误：猛甩腿、只拉到耳朵高度'
+      ]
+    },
+    {
+      cn: '高位下拉', en: 'Lat Pulldown', eq: '器械',
+      cues: [
+        '大腿固定，躯干微后仰但不后仰过度',
+        '把杆拉向锁骨/上胸，肘朝下后方',
+        '底部挤压背阔，再控制上回',
+        '握距可略宽，感受背而不是二头',
+        '常见错误：借力后仰、拉到胸口以下过低'
+      ]
+    },
+    {
+      cn: '坐姿划船', en: 'Seated Cable Row', eq: '绳索/器械',
+      cues: [
+        '坐直，膝微屈，拉时肩胛后夹',
+        '把手拉至腹附近，肘贴近身体',
+        '前伸时让背阔充分拉伸，但腰不要大幅圆背',
+        '节奏：拉 1 秒、停 1 秒、放 2 秒',
+        '常见错误：整个人前后甩、耸肩'
+      ]
+    },
+    {
+      cn: '杠铃划船', en: 'Barbell Row', eq: '杠铃',
+      cues: [
+        '髋铰链俯身约 30°–45°，背保持中立',
+        '杠铃沿腿上拉至下腹/肚脐附近',
+        '发力想“肘往后上方”，不是用手弯举',
+        '核心绷紧，避免下背晃',
+        '常见错误：站太直、用下背甩起'
+      ]
+    },
+    {
+      cn: '单臂哑铃划船', en: 'One-arm Dumbbell Row', eq: '哑铃',
+      cues: [
+        '一手一膝撑凳，另一侧拉哑铃',
+        '肘贴近身体向髋后拉',
+        '顶端肩胛收紧，下放充分拉伸',
+        '躯干尽量稳定，不要大幅扭转',
+        '常见错误：用转腰甩重量'
+      ]
+    },
+    {
+      cn: '直臂下压', en: 'Straight-arm Pulldown', eq: '绳索',
+      cues: [
+        '肘微屈固定，用背阔把杆压向大腿',
+        '身体可微前倾，感受背阔缩短',
+        '重量宜中轻，专注挤压',
+        '很好的背阔“启动”动作',
+        '常见错误：弯肘变成下压三头'
+      ]
+    },
+    {
+      cn: '反向飞鸟', en: 'Reverse Fly', eq: '哑铃/器械',
+      cues: [
+        '俯身或坐姿，双臂向两侧打开',
+        '肘微屈，发力在后肩/上背',
+        '顶端肩胛轻夹，不要耸肩',
+        '改善圆肩体态很有用',
+        '常见错误：重量过大借惯性'
+      ]
+    },
+    {
+      cn: '面拉', en: 'Face Pull', eq: '绳索',
+      cues: [
+        '绳索约脸高，拉向脸/耳朵两侧',
+        '外旋上臂，肘高于肩线一些',
+        '重点练后束与外旋肌群',
+        '次数可偏多（12–20）',
+        '常见错误：拉到胸口变成划船'
+      ]
+    }
+  ],
+  shoulder: [
+    {
+      cn: '哑铃肩上推举', en: 'Dumbbell Shoulder Press', eq: '哑铃',
+      cues: [
+        '坐姿或站姿，核心收紧',
+        '哑铃从耳侧推至头顶上方',
+        '推起不要过度塌腰',
+        '下放控制，肘大约到肩高',
+        '常见错误：借腿蹬、过度挺腰'
+      ]
+    },
+    {
+      cn: '杠铃推举', en: 'Overhead Press', eq: '杠铃',
+      cues: [
+        '杠铃置于锁骨前，握距略宽于肩',
+        '推起时头部微后让，杠过脸后再回正',
+        '臀腿夹紧，像“一根柱子”',
+        '全程手腕在肘正上方',
+        '常见错误：过度后仰变成斜推'
+      ]
+    },
+    {
+      cn: '侧平举', en: 'Lateral Raise', eq: '哑铃',
+      cues: [
+        '肘微屈，把手臂抬到接近肩高',
+        '想像倒水：小指侧略高',
+        '重量要轻，严格控制',
+        '下放比抬起更慢',
+        '常见错误：甩起来、耸肩'
+      ]
+    },
+    {
+      cn: '前平举', en: 'Front Raise', eq: '哑铃/杠铃片',
+      cues: [
+        '手臂抬至眼睛高度即可',
+        '一次一只或交替，减少晃动',
+        '肩前束在推举里已较多，此动作适量',
+        '常见错误：借腰甩、抬得过高'
+      ]
+    },
+    {
+      cn: '俯身侧平举', en: 'Bent-over Lateral Raise', eq: '哑铃',
+      cues: [
+        '髋铰链俯身，背平',
+        '双臂向两侧打开练后束',
+        '顶端稍停，感受后肩发力',
+        '常见错误：用上背甩、站太直'
+      ]
+    },
+    {
+      cn: '阿诺德推举', en: 'Arnold Press', eq: '哑铃',
+      cues: [
+        '起始掌心朝自己，推起同时外旋',
+        '顶点掌心朝前，再控制旋回',
+        '活动范围大，重量比普通推举轻',
+        '常见错误：旋转过猛伤肩'
+      ]
+    },
+    {
+      cn: '绳索面拉（肩后束）', en: 'Face Pull', eq: '绳索',
+      cues: [
+        '与背部面拉相同要点',
+        '强调外旋与肩胛后收',
+        '肩部训练结尾很适合',
+        '常见错误：重量太大变成划船'
+      ]
+    },
+    {
+      cn: '耸肩', en: 'Shrug', eq: '哑铃/杠铃',
+      cues: [
+        '肩垂直上提，像耸肩表情',
+        '顶端停 1 秒，再慢放',
+        '不要转肩画圈',
+        '常见错误：弯肘借力、脖子前伸'
+      ]
+    }
+  ],
+  biceps: [
+    {
+      cn: '哑铃弯举', en: 'Dumbbell Curl', eq: '哑铃',
+      cues: [
+        '上臂贴紧身体两侧',
+        '掌心向上弯起，顶端挤二头',
+        '下放至接近伸直但别弹抖',
+        '可坐姿减少借力',
+        '常见错误：甩腰、肘向前漂移'
+      ]
+    },
+    {
+      cn: '杠铃弯举', en: 'Barbell Curl', eq: '杠铃',
+      cues: [
+        '站直，核心收紧',
+        '杠铃沿身体向上弯',
+        'EZ 杠可减轻手腕压力',
+        '常见错误：大幅后仰作弊'
+      ]
+    },
+    {
+      cn: '锤式弯举', en: 'Hammer Curl', eq: '哑铃',
+      cues: [
+        '掌心相对（中立握）',
+        '兼顾肱肌与前臂',
+        '对肘较友好的弯举变式',
+        '常见错误：耸肩、左右晃'
+      ]
+    },
+    {
+      cn: '斜托弯举', en: 'Preacher Curl', eq: '器械/杠铃',
+      cues: [
+        '腋下抵住斜托，减少借力',
+        '下放不要完全锁死弹起',
+        '底部控制，顶部挤压',
+        '常见错误：底部弹震伤肘'
+      ]
+    },
+    {
+      cn: '集中弯举', en: 'Concentration Curl', eq: '哑铃',
+      cues: [
+        '坐姿，肘抵大腿内侧',
+        '严格单侧孤立二头',
+        '适合力竭或雕刻',
+        '常见错误：身体侧倾借力'
+      ]
+    },
+    {
+      cn: '绳索弯举', en: 'Cable Curl', eq: '绳索',
+      cues: [
+        '张力贯穿全程',
+        '上臂固定，只动前臂',
+        '可用直杆或绳索把手',
+        '常见错误：站太远导致肘前移'
+      ]
+    },
+    {
+      cn: '反向弯举', en: 'Reverse Curl', eq: '杠铃/哑铃',
+      cues: [
+        '掌心朝下握杠',
+        '强化前臂伸肌与肱桡肌',
+        '重量明显更轻',
+        '常见错误：手腕过度背伸'
+      ]
+    }
+  ],
+  triceps: [
+    {
+      cn: '绳索下压', en: 'Triceps Pushdown', eq: '绳索',
+      cues: [
+        '肘贴腰侧固定',
+        '只伸展前臂下压，顶端挤三头',
+        '回放至前臂接近平行',
+        '常见错误：肘前后甩、含胸过度'
+      ]
+    },
+    {
+      cn: '过顶臂屈伸', en: 'Overhead Triceps Extension', eq: '哑铃/绳索',
+      cues: [
+        '大臂贴近耳侧，肘朝天花板',
+        '下放哑铃至脑后有拉伸',
+        '伸直时挤长头',
+        '常见错误：肘大幅外展、塌腰'
+      ]
+    },
+    {
+      cn: '仰卧臂屈伸', en: 'Skull Crusher', eq: '杠铃/哑铃',
+      cues: [
+        '仰卧，上臂垂直或微倾',
+        '下放至额前/头顶后方',
+        '肘稳定，用三头推起',
+        '常见错误：肘四处移动、砸到脸'
+      ]
+    },
+    {
+      cn: '双杠臂屈伸（偏三头）', en: 'Triceps Dips', eq: '自重/双杠',
+      cues: [
+        '躯干更直立，肘贴近身体',
+        '下放至肘约 90°',
+        '推起伸直手臂挤三头',
+        '肩不适者改用器械或绳索',
+        '常见错误：下放过深、过度前倾'
+      ]
+    },
+    {
+      cn: '窄距俯卧撑', en: 'Diamond / Close-grip Push-up', eq: '自重',
+      cues: [
+        '手距窄于肩，可钻石手型',
+        '肘贴近身体下放',
+        '胸仍要接近地面',
+        '常见错误：手太窄压手腕'
+      ]
+    },
+    {
+      cn: '窄握卧推', en: 'Close-grip Bench Press', eq: '杠铃',
+      cues: [
+        '握距约肩宽或略窄',
+        '肘靠近身体下放',
+        '兼顾胸与三头力量',
+        '常见错误：握太窄伤腕'
+      ]
+    },
+    {
+      cn: '踢后伸', en: 'Triceps Kickback', eq: '哑铃',
+      cues: [
+        '俯身，上臂贴躯干固定',
+        '只伸前臂向后踢直',
+        '顶端停顿挤压',
+        '重量宜轻',
+        '常见错误：甩整个手臂'
+      ]
+    }
+  ],
+  legs: [
+    {
+      cn: '杠铃深蹲', en: 'Barbell Back Squat', eq: '杠铃',
+      cues: [
+        '杠置于斜方肌上，脚约肩宽，脚尖微外展',
+        '髋膝同时弯，膝朝脚尖方向',
+        '下至大腿接近平行或更深（灵活度允许）',
+        '起身脚掌踩地，髋膝伸展',
+        '常见错误：膝盖内扣、腰过度弯曲、脚后跟抬起'
+      ]
+    },
+    {
+      cn: '前蹲', en: 'Front Squat', eq: '杠铃',
+      cues: [
+        '杠在肩前，肘抬高托住',
+        '躯干更直立，更刺股四头',
+        '核心要求高，重量通常低于后蹲',
+        '常见错误：肘掉导致杠滑'
+      ]
+    },
+    {
+      cn: '腿举', en: 'Leg Press', eq: '器械',
+      cues: [
+        '脚放踏板中部，下背贴紧',
+        '下放至膝约 90° 或舒适深度',
+        '不要让下背离开靠垫',
+        '常见错误：下放太深圆背、锁死弹膝'
+      ]
+    },
+    {
+      cn: '腿屈伸', en: 'Leg Extension', eq: '器械',
+      cues: [
+        '座垫贴腘窝，脚背勾住垫辊',
+        '伸膝至接近伸直，顶端挤股四',
+        '慢放有控制',
+        '常见错误：用惯性甩、臀部离开座位'
+      ]
+    },
+    {
+      cn: '俯卧腿弯举', en: 'Lying Leg Curl', eq: '器械',
+      cues: [
+        '髋贴垫，用腘绳肌把垫辊弯向臀',
+        '顶端挤压，下放控制',
+        '骨盆不要大幅度翘',
+        '常见错误：借腰甩'
+      ]
+    },
+    {
+      cn: '罗马尼亚硬拉', en: 'Romanian Deadlift', eq: '杠铃/哑铃',
+      cues: [
+        '微屈膝固定，髋向后推',
+        '杠沿腿下滑，感受腘绳与臀拉伸',
+        '背中立，起身髋前送',
+        '常见错误：弯腰低头、膝过度弯曲变成深蹲'
+      ]
+    },
+    {
+      cn: '弓步蹲', en: 'Lunge', eq: '自重/哑铃',
+      cues: [
+        '一大步，前后脚着地，躯干直立',
+        '后膝向地面靠近，前膝不内扣',
+        '可向前走弓步或原地',
+        '常见错误：步距太小、前膝过度内扣'
+      ]
+    },
+    {
+      cn: '保加利亚分腿蹲', en: 'Bulgarian Split Squat', eq: '自重/哑铃',
+      cues: [
+        '后脚抬在凳上，前脚在前',
+        '下蹲时体重主要在前脚',
+        '对单侧力量与臀腿刺激强',
+        '常见错误：前脚太近导致膝过度前移疼痛'
+      ]
+    },
+    {
+      cn: '提踵', en: 'Calf Raise', eq: '器械/自重',
+      cues: [
+        '前脚掌支撑，脚跟尽量下放拉伸',
+        '提起至最高，停顿再慢放',
+        '膝可直腿或微屈变式',
+        '常见错误：弹震、行程太短'
+      ]
+    }
+  ],
+  glutes: [
+    {
+      cn: '臀桥', en: 'Glute Bridge', eq: '自重/杠铃',
+      cues: [
+        '仰卧屈膝，脚掌踩地约肩宽',
+        '脚跟发力把髋顶起，顶端挤臀',
+        '不要过度挺腰用下背代偿',
+        '常见错误：顶太高塌腰、脚踩太远'
+      ]
+    },
+    {
+      cn: '髋推', en: 'Hip Thrust', eq: '杠铃',
+      cues: [
+        '上背靠凳，杠置于髋折处（可垫垫）',
+        '下放到髋有拉伸，再垂直上推',
+        '顶端身体接近一条直线，停顿挤臀',
+        '常见错误：用腰甩、下巴乱抬乱低'
+      ]
+    },
+    {
+      cn: '绳索后踢腿', en: 'Cable Kickback', eq: '绳索',
+      cues: [
+        '踝扣连接，向后上方踢',
+        '躯干稳定，不靠甩腰',
+        '顶端挤压单侧臀',
+        '常见错误：幅度过大代偿下背'
+      ]
+    },
+    {
+      cn: '蚌式开合', en: 'Clamshell', eq: '自重/弹力带',
+      cues: [
+        '侧躺屈膝，脚并拢，上方膝打开',
+        '骨盆不要后滚',
+        '激活臀中肌，热身很好用',
+        '常见错误：翻身借力'
+      ]
+    },
+    {
+      cn: '侧卧抬腿', en: 'Side-lying Leg Raise', eq: '自重',
+      cues: [
+        '侧躺，上方腿伸直侧抬',
+        '脚尖可微勾，感受臀侧',
+        '动作小而稳，次数可偏多',
+        '常见错误：向前甩腿'
+      ]
+    },
+    {
+      cn: '山羊挺身（偏臀）', en: 'Back Extension (glute focus)', eq: '器械',
+      cues: [
+        '垫在髋下，起身时想着夹臀',
+        '不要过度超伸压腰',
+        '双手可抱胸或持片增阻',
+        '常见错误：用惯性甩起、顶太高'
+      ]
+    },
+    {
+      cn: '相扑硬拉', en: 'Sumo Deadlift', eq: '杠铃',
+      cues: [
+        '宽站距，脚尖外展，手在腿内侧握杠',
+        '髋膝同时伸，杠贴近身体',
+        '更偏内收肌与臀',
+        '常见错误：过早伸膝变成直腿硬拉'
+      ]
+    },
+    {
+      cn: '哑铃相扑蹲', en: 'Sumo Squat', eq: '哑铃',
+      cues: [
+        '宽站距，哑铃垂于身前',
+        '下蹲膝朝脚尖，躯干尽量直',
+        '起身夹臀',
+        '常见错误：脚尖不外展导致膝别扭'
+      ]
+    }
+  ],
+  core: [
+    {
+      cn: '平板支撑', en: 'Plank', eq: '自重',
+      cues: [
+        '肘或手撑地，身体一条直线',
+        '收腹、夹臀，不要塌腰或撅臀',
+        '从 20–40 秒开始，质量优先',
+        '常见错误：屁股老高、憋气耸肩'
+      ]
+    },
+    {
+      cn: '死虫', en: 'Dead Bug', eq: '自重',
+      cues: [
+        '仰卧，腰贴地，对侧手脚伸远',
+        '全程下背贴地不拱',
+        '呼吸平稳，适合唤醒核心',
+        '常见错误：腰离开地面'
+      ]
+    },
+    {
+      cn: '鸟狗', en: 'Bird Dog', eq: '自重',
+      cues: [
+        '四点跪撑，对侧手脚伸直',
+        '骨盆稳定不歪',
+        '伸远再收回，交替',
+        '常见错误：塌腰、乱晃'
+      ]
+    },
+    {
+      cn: '卷腹', en: 'Crunch', eq: '自重',
+      cues: [
+        '仰卧屈膝，卷起肩胛离地即可',
+        '下背保持贴地，不要坐起来',
+        '呼气卷起，吸气放下',
+        '常见错误：用手猛拉脖子'
+      ]
+    },
+    {
+      cn: '悬垂举腿', en: 'Hanging Leg Raise', eq: '单杠',
+      cues: [
+        '悬垂，核心把腿上举',
+        '初学可先屈膝举',
+        '控制下放，减少晃荡',
+        '常见错误：纯甩腿、过度后仰'
+      ]
+    },
+    {
+      cn: '俄罗斯转体', en: 'Russian Twist', eq: '自重/药球',
+      cues: [
+        '坐姿微后倾，脚可离地',
+        '躯干左右转，手触地两侧',
+        '转的是胸廓，不是只甩手臂',
+        '常见错误：速度太快没控制'
+      ]
+    },
+    {
+      cn: '侧平板', en: 'Side Plank', eq: '自重',
+      cues: [
+        '单肘撑，身体侧向一条线',
+        '髋上提不塌',
+        '两侧都做，可从短时间开始',
+        '常见错误：肩堆到耳朵、髋下沉'
+      ]
+    },
+    {
+      cn: '农夫行走', en: 'Farmer Carry', eq: '哑铃/壶铃',
+      cues: [
+        '双手提重物直立行走',
+        '肩下沉，核心抗侧屈',
+        '也是很好的握力与全身稳定训练',
+        '常见错误：歪向一侧、步伐拖沓'
+      ]
+    }
+  ],
+  cardio: [
+    {
+      cn: '开合跳', en: 'Jumping Jack', eq: '自重',
+      cues: [
+        '跳起手脚同时开合',
+        '落地屈膝缓冲',
+        '热身或间歇很合适',
+        '常见错误：落地锁死膝盖'
+      ]
+    },
+    {
+      cn: '高抬腿', en: 'High Knees', eq: '自重',
+      cues: [
+        '原地交替抬膝接近髋高',
+        '前脚掌轻快落地',
+        '摆臂配合节奏',
+        '常见错误：只抬脚尖没抬膝'
+      ]
+    },
+    {
+      cn: '波比跳', en: 'Burpee', eq: '自重',
+      cues: [
+        '下蹲撑地→平板→可选俯卧撑→跳起拍手',
+        '可去掉跳跃或俯卧撑降低难度',
+        '强度高，注意呼吸',
+        '常见错误：塌腰砸地、起立不伸髋'
+      ]
+    },
+    {
+      cn: '登山跑', en: 'Mountain Climber', eq: '自重',
+      cues: [
+        '平板姿势，交替收膝向胸',
+        '髋保持稳定高度',
+        '可慢可快，核心要绷',
+        '常见错误：屁股上下乱晃'
+      ]
+    },
+    {
+      cn: '跳绳', en: 'Jump Rope', eq: '跳绳',
+      cues: [
+        '前脚掌轻跳，膝盖微弹',
+        '手腕摇绳，不是整臂大抡',
+        '可间歇：跳 30 秒休 30 秒',
+        '常见错误：跳太高、绳长不合适'
+      ]
+    },
+    {
+      cn: '跑步机走跑', en: 'Treadmill Walk/Run', eq: '器械',
+      cues: [
+        '先走热身再提速',
+        '目视前方，不要趴扶手',
+        '可坡度行走减冲击',
+        '常见错误：一直抓扶手、步幅乱'
+      ]
+    },
+    {
+      cn: '划船机', en: 'Rowing Machine', eq: '器械',
+      cues: [
+        '顺序：腿蹬→髋展→臂拉；回程相反',
+        '核心稳定，不要先猛拉手臂',
+        '全身有氧且对关节友好',
+        '常见错误：只靠手拉、圆背'
+      ]
+    },
+    {
+      cn: '壶铃摇摆', en: 'Kettlebell Swing', eq: '壶铃',
+      cues: [
+        '髋铰链发力把壶铃甩至胸/眼高',
+        '不是深蹲也不是用手抬',
+        '顶端夹臀，下放髋后坐',
+        '常见错误：用腰甩、举过头顶失控'
+      ]
+    }
+  ]
+};
+
+const state = { view: 'home', partId: null, exIndex: null, q: '' };
+
+const $main = document.getElementById('main');
+const $title = document.getElementById('title');
+const $sub = document.getElementById('subtitle');
+const $back = document.getElementById('backBtn');
+const $search = document.getElementById('search');
+const $searchWrap = document.getElementById('searchWrap');
+
+function partById(id) { return PARTS.find(p => p.id === id); }
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderHome() {
+  $title.textContent = '动作讲解手册';
+  $sub.textContent = '点部位查看动作 · 可搜索';
+  $back.classList.remove('show');
+  $searchWrap.classList.remove('hidden');
+
+  if (state.q.trim()) {
+    renderSearchResults(state.q.trim());
+    return;
+  }
+
+  const cards = PARTS.map(p => {
+    const n = (EXERCISES[p.id] || []).length;
+    return `<button type="button" class="part-card" data-part="${p.id}">
+      <span class="emoji">${p.emoji}</span>
+      <span class="name">${p.name}</span>
+      <span class="count">${n} 个动作</span>
+    </button>`;
+  }).join('');
+
+  $main.innerHTML = `<div class="grid">${cards}</div>
+    <p class="hint">提示：Safari 打开后点分享 →「添加到主屏幕」，下次像 App 一样点开。内容已内置，无网络也能看。</p>`;
+
+  $main.querySelectorAll('[data-part]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.view = 'list';
+      state.partId = btn.dataset.part;
+      state.exIndex = null;
+      render();
+    });
+  });
+}
+
+function renderList() {
+  const part = partById(state.partId);
+  const list = EXERCISES[state.partId] || [];
+  $title.textContent = part ? part.name : '动作';
+  $sub.textContent = `${list.length} 个常用动作`;
+  $back.classList.add('show');
+  $searchWrap.classList.add('hidden');
+
+  const rows = list.map((ex, i) => `
+    <button type="button" class="ex-row" data-i="${i}">
+      <div class="meta">
+        <div class="cn">${escapeHtml(ex.cn)}</div>
+        <div class="en">${escapeHtml(ex.en || '')}</div>
+      </div>
+      <span class="chip">${escapeHtml(ex.eq)}</span>
+      <span class="chev">›</span>
+    </button>`).join('');
+
+  $main.innerHTML = `<div class="list">${rows}</div>`;
+  $main.querySelectorAll('[data-i]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.view = 'detail';
+      state.exIndex = Number(btn.dataset.i);
+      render();
+    });
+  });
+}
+
+function renderDetail() {
+  const part = partById(state.partId);
+  const ex = (EXERCISES[state.partId] || [])[state.exIndex];
+  if (!ex) { state.view = 'list'; render(); return; }
+
+  $title.textContent = ex.cn;
+  $sub.textContent = part ? part.name : '';
+  $back.classList.add('show');
+  $searchWrap.classList.add('hidden');
+
+  const cues = ex.cues.map((c, idx) => {
+    const isErr = /常见错误/.test(c);
+    return `<li class="${isErr ? 'warn' : ''}">${escapeHtml(c)}</li>`;
+  }).join('');
+
+  $main.innerHTML = `<article class="detail">
+    <div class="en">${escapeHtml(ex.en || '')}</div>
+    <div class="equip"><span class="chip">${escapeHtml(ex.eq)}</span></div>
+    <h3>要点</h3>
+    <ul>${cues}</ul>
+  </article>`;
+}
+
+function renderSearchResults(q) {
+  const qq = q.toLowerCase();
+  const hits = [];
+  PARTS.forEach(p => {
+    (EXERCISES[p.id] || []).forEach((ex, i) => {
+      const blob = `${ex.cn} ${ex.en} ${ex.eq} ${p.name}`.toLowerCase();
+      if (blob.includes(qq)) hits.push({ partId: p.id, partName: p.name, i, ex });
+    });
+  });
+
+  $title.textContent = '搜索结果';
+  $sub.textContent = hits.length ? `找到 ${hits.length} 个` : '没有匹配';
+  $back.classList.remove('show');
+
+  if (!hits.length) {
+    $main.innerHTML = `<div class="empty">没有找到「${escapeHtml(q)}」相关动作</div>`;
+    return;
+  }
+
+  const rows = hits.map(h => `
+    <button type="button" class="ex-row" data-part="${h.partId}" data-i="${h.i}">
+      <div class="meta">
+        <div class="cn">${escapeHtml(h.ex.cn)}</div>
+        <div class="en">${escapeHtml(h.partName)} · ${escapeHtml(h.ex.en || '')}</div>
+      </div>
+      <span class="chip">${escapeHtml(h.ex.eq)}</span>
+      <span class="chev">›</span>
+    </button>`).join('');
+
+  $main.innerHTML = `<div class="list">${rows}</div>`;
+  $main.querySelectorAll('[data-part]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.view = 'detail';
+      state.partId = btn.dataset.part;
+      state.exIndex = Number(btn.dataset.i);
+      state.q = '';
+      $search.value = '';
+      render();
+    });
+  });
+}
+
+function render() {
+  if (state.view === 'home') renderHome();
+  else if (state.view === 'list') renderList();
+  else renderDetail();
+  window.scrollTo(0, 0);
+}
+
+$back.addEventListener('click', () => {
+  if (state.view === 'detail') { state.view = 'list'; state.exIndex = null; }
+  else { state.view = 'home'; state.partId = null; }
+  render();
+});
+
+let searchTimer;
+$search.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    state.q = $search.value;
+    state.view = 'home';
+    state.partId = null;
+    state.exIndex = null;
+    render();
+  }, 120);
+});
+
+render();
+</script>
+</body>
+</html>
